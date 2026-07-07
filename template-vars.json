@@ -1,6 +1,5 @@
 {
   "url": {
-    "defaultValue": "",
     "description": "Public URL of your Ghost instance (e.g., https://your-app.up.railway.app). Required for proper asset serving.",
     "isOptional": false
   },
