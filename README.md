@@ -1,82 +1,96 @@
-# Ghost on Railway
+# Deploy and Host
 
-Deploy a self-hosted [Ghost](https://ghost.org) blog on [Railway](https://railway.app) with a single click.
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/new/template/railway-ghost)
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/ghost)
+> **Canonical code:** `railway-ghost` — deploy URL: https://railway.com/new/template/railway-ghost
 
-## One-Line Description
+![OG Image](https://raw.githubusercontent.com/INAPP-Mobile/railway-ghost/main/og-image.svg)
 
-One-click self-hosted Ghost CMS on Railway — fast, clean blogging made simple.
+Deploy a self-hosted Ghost CMS blog on Railway in one click. Ghost is a powerful, open-source publishing platform used by creators and startups worldwide.
+
+## About Hosting
+
+Ghost runs as a single container with a Railway-managed PostgreSQL database for content storage and a persistent volume at `/var/lib/ghost/content` for uploaded images, themes, and adapters. Railway provides the compute, TLS at the edge, and a public URL. The service restarts automatically on failures via Railway's built-in health check.
+
+## Why Deploy
+
+- **Professional blogging platform** — Ghost powers thousands of publications with a clean, fast editor and modern theme system.
+- **Managed PostgreSQL** — Railway handles database provisioning, backups, and connection strings automatically.
+- **Built-in membership & subscriptions** — Turn readers into paying members with native Stripe integration.
+- **SEO optimized** — Clean URLs, automatic sitemaps, structured data, and fast page loads out of the box.
+- **REST API** — Full content API for headless CMS use cases and custom frontends.
+- **Zero-config deploy** — One click and Ghost is running with sensible production defaults.
+
+## Common Use Cases
+
+- **Personal blog** — Start writing immediately with the distraction-free editor.
+- **Membership site** — Publish premium content behind a paywall with Stripe subscriptions.
+- **Company blog** — Share product updates, changelogs, and engineering posts.
+- **Newsletter** — Built-in email newsletter delivery to subscribers.
+- **Headless CMS** — Use the Content API to power a custom frontend or mobile app.
+
+## Dependencies for Ghost
+
+### Deployment Dependencies
+
+Ghost requires a PostgreSQL database and a persistent volume for uploaded content. Add a Railway PostgreSQL service to your project — the connection string is auto-injected via `DATABASE_URL`. A volume at `/var/lib/ghost/content` is auto-provisioned for image and theme persistence. For email delivery, configure SMTP via environment variables (Mailgun recommended).
+
+---
 
 ## Features
 
-- **Single Container** — no external dependencies beyond Postgres (Railway-managed)
-- **Pinned Base Image** — `ghost:6-alpine` for reproducible builds
-- **Non-Root User** — running as the `ghost` user inside the container
-- **Health Check Endpoint** — `/health` monitored by Railway
-- **One-Click Deploy** — no local setup required
+- **Persistent volume** — Uploaded images and themes survive restarts via a volume at `/var/lib/ghost/content`
+- **Managed PostgreSQL** — Railway provisions and manages your database
+- **Single container** — Ghost 6 Alpine image, no sidecars needed
+- **Health check endpoint** — `/ghost/api/admin/` monitored by Railway
+- **Non-root user** — Runs as the `node` user inside the container
+- **One-click deploy** — No local setup required
 
 ## Architecture
 
 ```
-┌─────────────────────┐         ┌──────────────────┐
-│   your browser       │────────▶│  GitHub (source)  │
-└─────────────────────┘         └──────────────────┘
-                                ┌──────────────────┐
-│                            │   Railway           │
-│                              Docker build       │
-│                              + Ghost app layer   │
-│                            └──────────────────┘
-│                                   │
-│                     ┌─────────────────────────┐
-│                     │  PostgreSQL (Railway)    │
-│                     │  (content & metadata)    │
-│                     └─────────────────────────┘
-└─────────────────────────────────────────────────────┘
+Railway Container
+  ├── Ghost 6 (Alpine) → PORT, healthcheck
+  ├── Volume: /var/lib/ghost/content → images, themes, adapters
+  └── PostgreSQL (Railway-managed) → content, users, settings
 ```
 
-1. Push to Railway → Dockerfile builds the Ghost image from `ghost:6-alpine`
-2. Railway sets environment variables (`url`, database config, etc.)
-3. App connects to your Postgres instance and starts serving at port 2368
-4. Health check hits `/health` periodically
+1. Railway builds the Ghost image, attaches the volume, and provisions PostgreSQL
+2. Environment variables (url, database config) are injected at runtime
+3. Ghost connects to Postgres and serves on the Railway-assigned PORT
+4. Uploaded images and themes persist in the attached volume
+5. Health check monitors `/ghost/api/admin/`
 
 ## Environment Variables
 
-| Variable | Description | Default | Notes |
-|----------|-------------|---------|-------|
-| `url` | Public URL of your Ghost instance | `https://your-app.railway.app` | Set in Railway project settings |
-| `DATABASE_URL` | PostgreSQL connection string | — | Add a Postgres service on Railway for auto-fill |
-| `database__client` | Database client | `postgres` | Override only if needed |
-| `database__connection__host` | DB host | `localhost` | Set automatically when using Railway Postgres |
-| `database__connection__port` | DB port | `5432` | Set automatically when using Railway Postgres |
-| `database__connection__user` | DB user | `postgres` | Set automatically when using Railway Postgres |
-| `database__connection__password` | DB password | — | Set automatically when using Railway Postgres |
-| `database__connection__database` | Database name | `ghost` | Set automatically when using Railway Postgres |
-| `mail__transport` | Email transport method | `direct` | Options: `smtp`, `direct`, `mailgun`, `sendmail` |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `url` | Yes | — | Public URL of your Ghost instance |
+| `DATABASE_URL` | Yes | Auto | PostgreSQL connection (Railway auto-injects) |
+| `database__client` | No | `postgres` | Database client type |
+| `mail__transport` | No | `direct` | Email transport: `smtp`, `direct`, `mailgun` |
+| `MAIL_OPTIONS_HOST` | No | — | SMTP host (if `mail__transport=smtp`) |
+| `MAIL_OPTIONS_PORT` | No | `587` | SMTP port |
+| `MAIL_OPTIONS_AUTH_USER` | No | — | SMTP username |
+| `MAIL_OPTIONS_AUTH_PASS` | No | — | SMTP password |
 
 ## Getting Started
 
-1. Click **Deploy on Railway** above (or [deploy manually](https://railway.app/new)).
-2. Add a **PostgreSQL** service from the Railway templates marketplace.
-3. Copy the Postgres connection URL into your Ghost project settings for `DATABASE_URL`.
-4. Set your public `url` to match the Railway provisioned domain.
-5. Click **Deploy** — Ghost will start with ~60s boot time (first build).
-6. Visit your deployment URL at `/ghost` to create your admin account.
+1. Click **Deploy on Railway** above.
+2. Add a **PostgreSQL** service from the Railway marketplace.
+3. Set `url` to match your Railway domain (e.g., `https://your-app.up.railway.app`).
+4. Deploy — Ghost starts in ~60s on first build.
+5. Visit your URL at `/ghost` to create your admin account.
 
 ## Troubleshooting
 
-- **App not starting**: Check that `DATABASE_URL` is set and Postgres service is running in your Railway project.
-- **Health check fails**: First deploy may take 2–3 minutes while the container initializes. Retry after a few minutes.
-- **White screen at `/ghost/admin`**: Verify `url` matches your full Railway domain (e.g. `https://your-app-1234.railway.app`).
-- **SMTP not sending emails**: Switch `mail__transport` to `smtp` and add `MAIL_OPTIONS_HOST`, `MAIL_OPTIONS_PORT`, `MAIL_OPTIONS_USER`, `MAIL_OPTIONS_PASSWORD`. Consider using [Mailgun](https://www.mailgun.com/) or [SendGrid](https://sendgrid.com/).
-- **Postgres upgrade issues**: Always backup before upgrading Ghost versions. See [Ghost docs](https://ghost.org/docs/install/#upgrading-manually).
+| Issue | Solution |
+|-------|----------|
+| App not starting | Verify `DATABASE_URL` is set and Postgres is running |
+| Health check fails | First deploy may take 2–3 minutes; retry |
+| White screen at `/ghost` | Verify `url` matches your full Railway domain |
+| SMTP not sending | Switch `mail__transport` to `smtp` with proper credentials |
 
 ## License
 
-MIT — copy, modify, and deploy as you wish.
-
-## Resources
-
-- [Ghost Docs](https://ghost.org/docs/)
-- [Railway Docs](https://docs.railway.app/)
-- [Ghost on GitHub](https://github.com/TryGhost/Ghost)
+MIT. Ghost upstream is [MIT-licensed](https://github.com/TryGhost/Ghost). Template by [INAPP-Mobile](https://github.com/INAPP-Mobile).
