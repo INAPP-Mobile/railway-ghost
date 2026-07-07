@@ -1,12 +1,13 @@
 # Ghost Railway Template
 # https://github.com/TryGhost/Ghost
 
-FROM ghost:6-alpine AS base
+FROM ghost:6.51.0-alpine
 
-EXPOSE 2368
-
-ENV PORT=2368
+# Railway injects PORT at runtime for health checks and routing.
+# Ghost respects the PORT env var automatically.
 ENV NODE_ENV=production
 
-# Data is persisted via mounted volume at /var/lib/ghost/content on Railway
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=5 \
+  CMD curl -fsS "http://127.0.0.1:${PORT:-2368}/ghost/api/admin/" >/dev/null 2>&1 || exit 1
+
 CMD ["npm", "start"]
