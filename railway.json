@@ -10,6 +10,12 @@
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3,
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 300
+    "healthcheckTimeout": 300,
+    "volumeMounts": [
+      {
+        "name": "ghost-content",
+        "mountPath": "/var/lib/ghost/content"
+      }
+    ]
   }
 }
