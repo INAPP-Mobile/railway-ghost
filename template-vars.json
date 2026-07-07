@@ -1,0 +1,37 @@
+{
+  "url": {
+    "defaultValue": "",
+    "description": "Public URL of your Ghost instance (e.g., https://your-app.up.railway.app). Required for proper asset serving.",
+    "isOptional": false
+  },
+  "DATABASE_URL": {
+    "defaultValue": "${{Postgres.DATABASE_URL}}",
+    "description": "PostgreSQL connection string. Add a Railway Postgres service to auto-inject.",
+    "isOptional": false
+  },
+  "mail__transport": {
+    "defaultValue": "direct",
+    "description": "Mail transport method: direct, smtp, mailgun, or sendmail. Use 'smtp' for transactional email.",
+    "isOptional": true
+  },
+  "MAIL_OPTIONS_HOST": {
+    "defaultValue": "",
+    "description": "SMTP host address (required if mail__transport=smtp).",
+    "isOptional": true
+  },
+  "MAIL_OPTIONS_PORT": {
+    "defaultValue": "587",
+    "description": "SMTP port (default: 587 for STARTTLS).",
+    "isOptional": true
+  },
+  "MAIL_OPTIONS_AUTH_USER": {
+    "defaultValue": "",
+    "description": "SMTP username for authentication.",
+    "isOptional": true
+  },
+  "MAIL_OPTIONS_AUTH_PASS": {
+    "defaultValue": "${{secret(32)}}",
+    "description": "SMTP password for authentication. Auto-generated — replace with your real SMTP credentials.",
+    "isOptional": true
+  }
+}
