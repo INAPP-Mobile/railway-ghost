@@ -1,0 +1,11 @@
+[build]
+  builder = "DOCKERFILE"
+  dockerfilePath = "Dockerfile"
+
+[deploy]
+  numReplicas = 1
+  startCommand = "npm start -- --production"
+  healthcheckPath = "/ghost/api/admin/"
+  healthcheckTimeout = 300
+  restartPolicyType = "ON_FAILURE"
+  restartPolicyMaxRetries = 3
