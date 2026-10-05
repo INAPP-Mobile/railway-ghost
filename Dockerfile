@@ -1,7 +1,7 @@
 # Ghost Railway Template
 # https://github.com/TryGhost/Ghost
 
-FROM ghost:6.51.0-alpine
+FROM ghost:6.67.0-alpine
 
 # Railway injects PORT at runtime for health checks and routing.
 # Ghost respects the PORT env var automatically.
